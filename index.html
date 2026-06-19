@@ -1,0 +1,337 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0">
+<title>One Question</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Fredoka:wght@500;600;700&family=Quicksand:wght@500;600;700&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --blush-50:#FFF4F7;
+    --blush-100:#FFE3EB;
+    --rose-600:#C2185B;
+    --rose-700:#9E1450;
+    --rose-900:#4A0E2B;
+    --gold-400:#F2B84B;
+    --cream:#FFFCFA;
+  }
+
+  *{box-sizing:border-box;}
+
+  html,body{
+    margin:0;
+    height:100%;
+    width:100%;
+    overflow-x:hidden;
+    font-family:'Quicksand',sans-serif;
+    background: radial-gradient(circle at 50% 0%, var(--blush-50), var(--blush-100) 70%);
+    color:var(--rose-900);
+  }
+
+  body{
+    min-height:100vh;
+    display:flex;
+    align-items:center;
+    justify-content:center;
+    position:relative;
+  }
+
+  /* ambient floating hearts */
+  .bg-hearts{
+    position:fixed;
+    inset:0;
+    overflow:hidden;
+    pointer-events:none;
+    z-index:0;
+  }
+  .bg-heart{
+    position:absolute;
+    bottom:-10%;
+    opacity:.22;
+    color:var(--rose-600);
+    animation:drift linear infinite;
+  }
+  @keyframes drift{
+    0%{transform:translateY(0) translateX(0) rotate(0deg);}
+    100%{transform:translateY(-120vh) translateX(20px) rotate(25deg);}
+  }
+
+  .card{
+    position:relative;
+    z-index:1;
+    background:var(--cream);
+    border-radius:28px;
+    padding:48px 40px;
+    max-width:420px;
+    width:90%;
+    text-align:center;
+    box-shadow:0 20px 60px rgba(74,14,43,0.18);
+    transition:opacity .4s ease, transform .4s ease;
+  }
+  .card.hide{
+    opacity:0;
+    transform:scale(.92);
+  }
+
+  .eyebrow{
+    font-family:'Quicksand',sans-serif;
+    font-weight:700;
+    letter-spacing:.12em;
+    text-transform:uppercase;
+    font-size:.72rem;
+    color:var(--rose-600);
+    margin-bottom:10px;
+  }
+
+  h1{
+    font-family:'Fredoka',sans-serif;
+    font-weight:700;
+    font-size:2.1rem;
+    line-height:1.2;
+    margin:0 0 12px;
+    color:var(--rose-900);
+  }
+
+  #subtitle{
+    font-size:1rem;
+    color:#7a3550;
+    min-height:1.4em;
+    margin:0 0 32px;
+    transition:opacity .2s ease;
+  }
+
+  .actions{
+    display:flex;
+    gap:16px;
+    justify-content:center;
+    align-items:center;
+    flex-wrap:wrap;
+  }
+
+  button{
+    font-family:'Fredoka',sans-serif;
+    font-weight:600;
+    font-size:1.05rem;
+    border-radius:999px;
+    border:none;
+    padding:14px 34px;
+    cursor:pointer;
+    transition:transform .15s ease, box-shadow .15s ease, left .35s cubic-bezier(.34,1.56,.64,1), top .35s cubic-bezier(.34,1.56,.64,1);
+  }
+  button:focus-visible{
+    outline:3px solid var(--gold-400);
+    outline-offset:3px;
+  }
+
+  #yesBtn{
+    background:linear-gradient(135deg, var(--rose-600), var(--rose-700));
+    color:#fff;
+    box-shadow:0 10px 24px rgba(194,24,91,0.35);
+  }
+  #yesBtn:hover{
+    transform:scale(1.05);
+  }
+
+  #noBtn{
+    background:transparent;
+    color:var(--rose-700);
+    border:2px solid var(--rose-600);
+  }
+  #noBtn.escaped{
+    position:fixed;
+    z-index:40;
+  }
+
+  /* success screen */
+  #successCard{
+    display:none;
+    align-items:center;
+    justify-content:center;
+  }
+  #successCard.show{
+    opacity:1;
+  }
+  #successCard h1{
+    font-size:1.6rem;
+  }
+  #successCard .heart-icon{
+    font-size:2.6rem;
+    margin-bottom:5px;
+  }
+
+  .heart-particle{
+    position:fixed;
+    top:-8vh;
+    pointer-events:none;
+    z-index:60;
+    animation:fall linear forwards;
+  }
+  @keyframes fall{
+    0%{ transform:translateY(0) rotate(0deg); opacity:0; }
+    8%{ opacity:1; }
+    100%{ transform:translateY(115vh) rotate(360deg); opacity:.85; }
+  }
+
+  @media (prefers-reduced-motion: reduce){
+    .bg-heart{animation:none; opacity:.12;}
+    .heart-particle{animation:none; display:none;}
+    button{transition:none;}
+  }
+
+  @media (max-width:380px){
+    h1{font-size:1.7rem;}
+    .card{padding:36px 24px;}
+  }
+</style>
+</head>
+<body>
+
+<div class="bg-hearts" id="bgHearts" aria-hidden="true"></div>
+
+<div class="card" id="questionCard">
+  <div class="eyebrow">One question</div>
+  <h1>Are you choosing me?</h1>
+  <p id="subtitle" aria-live="polite">Just pick one. It's easy.</p>
+  <div class="actions">
+    <button id="yesBtn" type="button">YES</button>
+    <button id="noBtn" type="button">NO</button>
+  </div>
+</div>
+
+<div class="card" id="successCard">
+  <div>
+    <div class="heart-icon">💍</div>
+    <div class="eyebrow"> Finally You Took the Decisio - 19/06/2026</div>
+    <h1>Congratulations on finally saying yes and taking the decision for which I am really thankful to you!! <br>You have fallen in love with Sahil for life —<br>because he will never let you go now & will make sure you never regret this decision of yours. 💕 </h1>
+    <p id="successSub" style="margin-top:14px;"><br>- With love <br>- Sahil Gohri</p>
+  </div>
+</div>
+
+<script>
+  // ambient background hearts
+  const bgHearts = document.getElementById('bgHearts');
+  const heartChars = ['❤','💗','♥'];
+  for(let i=0;i<12;i++){
+    const h = document.createElement('span');
+    h.className = 'bg-heart';
+    h.textContent = heartChars[Math.floor(Math.random()*heartChars.length)];
+    h.style.left = Math.random()*100 + '%';
+    h.style.fontSize = (14 + Math.random()*22) + 'px';
+    h.style.animationDuration = (14 + Math.random()*12) + 's';
+    h.style.animationDelay = (Math.random()*10) + 's';
+    bgHearts.appendChild(h);
+  }
+
+  const noBtn = document.getElementById('noBtn');
+  const yesBtn = document.getElementById('yesBtn');
+  const subtitle = document.getElementById('subtitle');
+
+  const taunts = ["Nice try 😏","Nope!","Not happening 😄","Try again!","So close 😂","Nuh-uh","Catch me if you can","Wrong answer 😝","Still no 💁‍♀️","Yeah... no","Keep trying 🙃"];
+  const subtitles = [
+    "Just pick one. It's easy.",
+    "Pick one, no overthinking.",
+    "Seriously, just say YES 😄",
+    "NO seems to be malfunctioning.",
+    "Huh, weird, NO keeps moving.",
+    "Okay this is clearly a sign.",
+    "The universe is rooting for YES.",
+    "At this point just say YES 💍",
+    "NO is permanently out of office.",
+    "Even gravity agrees: it's YES."
+  ];
+
+  let attempts = 0;
+
+  function isTooCloseToYes(x, y, w, h){
+    const yr = yesBtn.getBoundingClientRect();
+    const cx = x + w/2, cy = y + h/2;
+    const ycx = yr.left + yr.width/2, ycy = yr.top + yr.height/2;
+    const dist = Math.hypot(cx-ycx, cy-ycy);
+    return dist < 150;
+  }
+
+  function randomSpot(w, h){
+    const pad = 18;
+    const maxX = Math.max(pad, window.innerWidth - w - pad);
+    const maxY = Math.max(pad, window.innerHeight - h - pad);
+    let x, y, tries = 0;
+    do{
+      x = pad + Math.random() * (maxX - pad);
+      y = pad + Math.random() * (maxY - pad);
+      tries++;
+    } while(tries < 6 && isTooCloseToYes(x, y, w, h));
+    return {x, y};
+  }
+
+  function dodge(e){
+    if(e) e.preventDefault();
+    attempts++;
+
+    if(!noBtn.classList.contains('escaped')){
+      const r = noBtn.getBoundingClientRect();
+      noBtn.classList.add('escaped');
+      noBtn.style.left = r.left + 'px';
+      noBtn.style.top = r.top + 'px';
+      noBtn.style.margin = '0';
+    }
+
+    const rect = noBtn.getBoundingClientRect();
+    requestAnimationFrame(() => {
+      const {x, y} = randomSpot(rect.width, rect.height);
+      noBtn.style.left = x + 'px';
+      noBtn.style.top = y + 'px';
+    });
+
+    noBtn.textContent = taunts[(attempts - 1) % taunts.length];
+    subtitle.textContent = subtitles[Math.min(attempts - 1, subtitles.length - 1)];
+
+    const scale = Math.min(1 + attempts * 0.06, 1.55);
+    yesBtn.style.transform = `scale(${scale})`;
+  }
+
+  ['pointerenter','pointerdown','touchstart','focus','click'].forEach(evt => {
+    noBtn.addEventListener(evt, dodge, {passive:false});
+  });
+
+  window.addEventListener('resize', () => {
+    if(noBtn.classList.contains('escaped')){
+      const rect = noBtn.getBoundingClientRect();
+      const {x, y} = randomSpot(rect.width, rect.height);
+      noBtn.style.left = x + 'px';
+      noBtn.style.top = y + 'px';
+    }
+  });
+
+  yesBtn.addEventListener('click', () => {
+    const questionCard = document.getElementById('questionCard');
+    const successCard = document.getElementById('successCard');
+    questionCard.classList.add('hide');
+    setTimeout(() => {
+      questionCard.style.display = 'none';
+      successCard.style.display = 'flex';
+      requestAnimationFrame(() => successCard.classList.add('show'));
+      launchHearts();
+    }, 380);
+  });
+
+  function launchHearts(){
+    const colors = ['#C2185B','#F2B84B','#FF8FAB','#9E1450'];
+    const chars = ['❤','💗','💖','♥'];
+    for(let i=0;i<46;i++){
+      const h = document.createElement('span');
+      h.className = 'heart-particle';
+      h.textContent = chars[Math.floor(Math.random()*chars.length)];
+      h.style.left = Math.random()*100 + 'vw';
+      h.style.fontSize = (14 + Math.random()*22) + 'px';
+      h.style.color = colors[Math.floor(Math.random()*colors.length)];
+      const dur = 3 + Math.random()*2.5;
+      h.style.animationDuration = dur + 's';
+      h.style.animationDelay = (Math.random()*1.2) + 's';
+      document.body.appendChild(h);
+      setTimeout(() => h.remove(), (dur + 1.5) * 1000);
+    }
+  }
+</script>
+</body>
+</html>
